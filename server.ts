@@ -1,6 +1,8 @@
+import "dotenv/config";
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import Database from "better-sqlite3";
+import { GoogleGenAI } from "@google/genai";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -224,6 +226,72 @@ async function startServer() {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete lead" });
+    }
+  });
+
+  const CHAT_MODEL = "gemini-3-flash-preview";
+
+  app.post("/api/chat", async (req, res) => {
+    const { message, history } = req.body ?? {};
+
+    if (typeof message !== "string" || !message.trim() || message.length > 2000) {
+      return res.status(400).json({ error: "message must be 1-2000 characters" });
+    }
+    const turns = history ?? [];
+    const validTurns =
+      Array.isArray(turns) &&
+      turns.length <= 20 &&
+      turns.every(
+        (t: any) =>
+          (t?.role === "user" || t?.role === "model") && typeof t?.text === "string"
+      );
+    if (!validTurns) {
+      return res.status(400).json({ error: "history must be up to 20 turns" });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(503).json({
+        error: "Chat is not configured. Add GEMINI_API_KEY to .env",
+      });
+    }
+
+    try {
+      const leads = db
+        .prepare("SELECT name, company, status, value FROM leads ORDER BY updated_at DESC")
+        .all();
+      const meetings = db
+        .prepare(`
+          SELECT m.title, m.meeting_date, m.is_completed, l.name as lead_name
+          FROM meetings m
+          JOIN leads l ON m.lead_id = l.id
+          ORDER BY m.meeting_date ASC
+        `)
+        .all();
+
+      const ai = new GoogleGenAI({ apiKey });
+      const chat = ai.chats.create({
+        model: CHAT_MODEL,
+        history: turns.map((t: { role: string; text: string }) => ({
+          role: t.role,
+          parts: [{ text: t.text }],
+        })),
+        config: {
+          systemInstruction: `You are the Qorelly Leads assistant for Ade's Kitchen, a catering business in Ibadan, Nigeria.
+You have read access to its leads tracker.
+Each lead's value is an ESTIMATED deal size in Nigerian naira, not revenue.
+Leads: ${JSON.stringify(leads)}
+Meetings: ${JSON.stringify(meetings)}
+Answer questions about leads, meetings and the pipeline. Be concise and practical.
+Use the data above; say so when it does not answer the question.`,
+        },
+      });
+
+      const response = await chat.sendMessage({ message: message.trim() });
+      res.json({ text: response.text ?? "" });
+    } catch (error) {
+      console.error("[chat] Gemini request failed");
+      res.status(502).json({ error: "Chat failed" });
     }
   });
 
