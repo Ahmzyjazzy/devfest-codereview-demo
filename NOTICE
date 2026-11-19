@@ -17,3 +17,10 @@ Icons: Solar by 480 Design
 licensed under CC BY 4.0
 (https://creativecommons.org/licenses/by/4.0/).
 A subset is bundled in src/lib/solar-icons.json.
+
+Review skills: code_review_agent/skills/security-and-hardening and
+code_review_agent/skills/code-review-and-quality are copied from
+addyosmani/agent-skills (https://github.com/addyosmani/agent-skills),
+commits 175013a and e270415, licensed under the MIT License.
+Copyright (c) 2025 Addy Osmani. See code_review_agent/skills/LICENSE.
+They reached this repo via alphinside/leads-crm-app-demo.
