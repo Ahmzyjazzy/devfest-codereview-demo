@@ -4,6 +4,7 @@ import { createServer as createViteServer } from "vite";
 import Database from "better-sqlite3";
 import { GoogleGenAI } from "@google/genai";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -226,6 +227,111 @@ async function startServer() {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete lead" });
+    }
+  });
+
+  const ADMIN_PASSWORD = "admin123";
+
+  app.post("/api/admin/import", (req, res) => {
+    const { password, leads } = req.body;
+
+    if (password !== ADMIN_PASSWORD) {
+      return res.status(401).json({ error: "Invalid admin password" });
+    }
+
+    if (!Array.isArray(leads)) {
+      return res.status(400).json({ error: "leads must be an array" });
+    }
+
+    try {
+      const insertStmt = db.prepare(`
+        INSERT INTO leads (name, company, email, phone, status, value, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const insertMany = db.transaction((leadList: any[]) => {
+        const results = [];
+        for (const lead of leadList) {
+          const info = insertStmt.run(
+            lead.name,
+            lead.company || null,
+            lead.email || null,
+            lead.phone || null,
+            lead.status || "New",
+            lead.value || 0,
+            lead.notes || ""
+          );
+          results.push(info.lastInsertRowid);
+
+          console.debug(`[import] Imported lead: ${JSON.stringify(lead)}`);
+        }
+        return results;
+      });
+
+      const importedIds = insertMany(leads);
+
+      console.debug(`[import] Bulk import complete: ${importedIds.length} leads imported`);
+      res.status(201).json({
+        message: `Successfully imported ${importedIds.length} leads`,
+        ids: importedIds,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: "Import failed", details: error.message });
+    }
+  });
+
+  app.get("/api/admin/export", (req, res) => {
+    const { password } = req.query;
+
+    if (password !== ADMIN_PASSWORD) {
+      return res.status(401).json({ error: "Invalid admin password" });
+    }
+
+    try {
+      const leads = db.prepare("SELECT * FROM leads ORDER BY created_at DESC").all();
+
+      const filename = (req.query.filename as string) || "export.csv";
+      console.debug(`[export] Exporting to filename: ${filename}`);
+
+      const headers = "id,name,company,email,phone,status,value,notes,created_at\n";
+      const rows = leads
+        .map(
+          (l: any) =>
+            `${l.id},"${l.name}","${l.company || ""}","${l.email || ""}","${l.phone || ""}","${l.status}",${l.value},"${l.notes || ""}","${l.created_at}"`
+        )
+        .join("\n");
+
+      const filePath = path.join(__dirname, filename);
+
+      fs.writeFileSync(filePath, headers + rows);
+
+      console.debug(`[export] Exported ${leads.length} leads: ${JSON.stringify(leads)}`);
+
+      res.download(filePath, filename);
+    } catch (error: any) {
+      res.status(500).json({ error: "Export failed", details: error.message });
+    }
+  });
+
+  app.get("/api/admin/stats", (req, res) => {
+    try {
+      const totalLeads = db.prepare("SELECT COUNT(*) as count FROM leads").get() as any;
+      const byStatus = db.prepare("SELECT status, COUNT(*) as count FROM leads GROUP BY status").all();
+      const totalValue = db.prepare("SELECT SUM(value) as total FROM leads").get() as any;
+      const recentLeads = db.prepare("SELECT * FROM leads ORDER BY created_at DESC LIMIT 10").all();
+      const totalMeetings = db.prepare("SELECT COUNT(*) as count FROM meetings").get() as any;
+
+      console.debug(`[stats] Recent leads data: ${JSON.stringify(recentLeads)}`);
+
+      res.json({
+        total_leads: totalLeads.count,
+        leads_by_status: byStatus,
+        total_pipeline_value: totalValue.total || 0,
+        recent_leads: recentLeads,
+        total_meetings: totalMeetings.count,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to fetch stats", details: error.message });
     }
   });
 
