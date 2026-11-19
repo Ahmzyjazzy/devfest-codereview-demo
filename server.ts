@@ -53,6 +53,75 @@ async function startServer() {
 
   app.use(express.json());
 
+  // API Routes - Leads
+  app.get("/api/leads", (req, res) => {
+    try {
+      const leads = db.prepare("SELECT * FROM leads ORDER BY updated_at DESC").all();
+      res.json(leads);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch leads" });
+    }
+  });
+
+  app.post("/api/leads", (req, res) => {
+    const { name, company, email, phone, status, value, notes } = req.body;
+    try {
+      const info = db.prepare(`
+        INSERT INTO leads (name, company, email, phone, status, value, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run(name, company, email, phone, status || 'New', value || 0, notes || '');
+      
+      const leadId = info.lastInsertRowid;
+      if (notes) {
+        db.prepare(`
+          INSERT INTO lead_notes (lead_id, content, type)
+          VALUES (?, ?, ?)
+        `).run(leadId, notes, 'general');
+      }
+
+      const newLead = db.prepare("SELECT * FROM leads WHERE id = ?").get(leadId);
+      res.status(201).json(newLead);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create lead" });
+    }
+  });
+
+  app.put("/api/leads/:id", (req, res) => {
+    const { id } = req.params;
+    const { name, company, email, phone, status, value, notes } = req.body;
+    try {
+      const oldLead = db.prepare("SELECT * FROM leads WHERE id = ?").get(id);
+      
+      db.prepare(`
+        UPDATE leads 
+        SET name = ?, company = ?, email = ?, phone = ?, status = ?, value = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).run(name, company, email, phone, status, value, notes, id);
+      
+      if (notes && notes !== oldLead.notes) {
+        db.prepare(`
+          INSERT INTO lead_notes (lead_id, content, type)
+          VALUES (?, ?, ?)
+        `).run(id, notes, 'general');
+      }
+
+      const updatedLead = db.prepare("SELECT * FROM leads WHERE id = ?").get(id);
+      res.json(updatedLead);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update lead" });
+    }
+  });
+
+  app.delete("/api/leads/:id", (req, res) => {
+    const { id } = req.params;
+    try {
+      db.prepare("DELETE FROM leads WHERE id = ?").run(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete lead" });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
