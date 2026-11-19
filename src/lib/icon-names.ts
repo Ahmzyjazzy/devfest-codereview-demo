@@ -7,6 +7,7 @@ export const ICON_NAMES = [
   "calendar",
   "calendar-add",
   "chart-2",
+  "chat-round-dots",
   "check-circle",
   "clock-circle",
   "close",
@@ -21,7 +22,8 @@ export const ICON_NAMES = [
   "refresh",
   "trash-bin-trash",
   "users-group-rounded",
-  "wallet-money"
+  "wallet-money",
+  "widget-5"
 ] as const
 
 export type IconName = (typeof ICON_NAMES)[number]

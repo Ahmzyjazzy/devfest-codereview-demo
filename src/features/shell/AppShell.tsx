@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 
 import { cn } from '@/lib/cn'
 import { Icon, type IconName } from '@/components/ui/icon'
+import type { View } from '@/lib/view'
 import {
   Sheet,
   SheetContent,
@@ -11,14 +12,17 @@ import {
 
 const BUSINESS_NAME = 'Ade’s Kitchen, Ibadan'
 
-const NAV: { label: string; icon: IconName; active: boolean }[] = [
-  { label: 'Leads', icon: 'users-group-rounded', active: true },
+const NAV: { view: View; label: string; icon: IconName }[] = [
+  { view: 'leads', label: 'Leads', icon: 'users-group-rounded' },
+  { view: 'dashboard', label: 'Dashboard', icon: 'widget-5' },
+  { view: 'meetings', label: 'Meetings', icon: 'calendar' },
+  { view: 'chat', label: 'Chat', icon: 'chat-round-dots' },
 ]
 
 function Brand() {
   return (
     <a
-      href="/"
+      href="#leads"
       aria-label="Qorelly Leads home"
       className="flex items-center gap-2 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
     >
@@ -32,32 +36,35 @@ function Brand() {
   )
 }
 
-function NavList({ onSelect }: { onSelect?: () => void }) {
+function NavList({ view, onSelect }: { view: View; onSelect?: () => void }) {
   return (
     <nav aria-label="Main">
       <ul className="space-y-1">
-        {NAV.map(item => (
-          <li key={item.label}>
-            <a
-              href="/"
-              aria-current={item.active ? 'page' : undefined}
-              onClick={onSelect}
-              className={cn(
-                'flex min-h-[38px] w-full items-center gap-3 rounded-lg px-3 py-2 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-gray-400',
-                item.active
-                  ? 'bg-surface font-medium text-gray-900 ring-1 ring-hairline/[0.05]'
-                  : 'text-gray-600 hover:bg-gray-200/60 hover:text-gray-900',
-              )}
-            >
-              <Icon
-                name={item.icon}
-                active={item.active}
-                className={item.active ? 'text-primary' : 'text-current'}
-              />
-              {item.label}
-            </a>
-          </li>
-        ))}
+        {NAV.map(item => {
+          const active = item.view === view
+          return (
+            <li key={item.view}>
+              <a
+                href={`#${item.view}`}
+                aria-current={active ? 'page' : undefined}
+                onClick={onSelect}
+                className={cn(
+                  'flex min-h-[38px] w-full items-center gap-3 rounded-lg px-3 py-2 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-gray-400',
+                  active
+                    ? 'bg-surface font-medium text-gray-900 ring-1 ring-hairline/[0.05]'
+                    : 'text-gray-600 hover:bg-gray-200/60 hover:text-gray-900',
+                )}
+              >
+                <Icon
+                  name={item.icon}
+                  active={active}
+                  className={active ? 'text-primary' : 'text-current'}
+                />
+                {item.label}
+              </a>
+            </li>
+          )
+        })}
       </ul>
     </nav>
   )
@@ -71,7 +78,13 @@ function RailFooter() {
   )
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({
+  view,
+  children,
+}: {
+  view: View
+  children: ReactNode
+}) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -81,7 +94,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Brand />
         </div>
         <div className="flex-1 px-3">
-          <NavList />
+          <NavList view={view} />
         </div>
         <div className="pb-4">
           <RailFooter />
@@ -127,7 +140,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Brand />
           </div>
           <div className="flex-1">
-            <NavList onSelect={() => setMenuOpen(false)} />
+            <NavList view={view} onSelect={() => setMenuOpen(false)} />
           </div>
           <RailFooter />
         </SheetContent>

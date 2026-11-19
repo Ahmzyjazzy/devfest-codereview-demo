@@ -9,6 +9,7 @@ const NAMES = [
   'calendar',
   'calendar-add',
   'chart-2',
+  'chat-round-dots',
   'check-circle',
   'clock-circle',
   'close',
@@ -24,6 +25,7 @@ const NAMES = [
   'trash-bin-trash',
   'users-group-rounded',
   'wallet-money',
+  'widget-5',
 ]
 
 const src = JSON.parse(
