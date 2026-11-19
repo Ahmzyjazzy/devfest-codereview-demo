@@ -64,6 +64,17 @@ export const api = {
   deleteMeeting: (id: number) =>
     request<{ success: boolean }>(`/api/meetings/${id}`, send('DELETE')),
 
+  leadInsights: (leadId: number) =>
+    request<{ text: string; note: LeadNote }>(
+      `/api/leads/${leadId}/insights`,
+      send('POST'),
+    ),
+  leadResearch: (leadId: number) =>
+    request<{ text: string; note: LeadNote }>(
+      `/api/leads/${leadId}/research`,
+      send('POST'),
+    ),
+
   chat: (message: string, history: ChatTurn[]) =>
     request<{ text: string }>('/api/chat', send('POST', { message, history })),
 }

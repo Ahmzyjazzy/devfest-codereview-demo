@@ -29,6 +29,7 @@ import {
   type LeadStatus,
   type Meeting,
 } from '@/types'
+import { AiPanel } from './AiPanel'
 import { MeetingFormDialog, type MeetingFormValues } from './MeetingFormDialog'
 import { MeetingsPanel } from './MeetingsPanel'
 import { NotesPanel } from './NotesPanel'
@@ -223,6 +224,11 @@ export function LeadDetailSheet({
                     {daysAgo(lead.created_at)}
                   </DetailRow>
                 </div>
+
+                <AiPanel
+                  leadId={lead.id}
+                  onNoteAdded={() => refresh(lead.id).catch(() => undefined)}
+                />
 
                 <MeetingsPanel
                   meetings={meetings}

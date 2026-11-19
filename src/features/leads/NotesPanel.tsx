@@ -2,10 +2,17 @@ import { useState, type FormEvent } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/input'
-import { Pill } from '@/components/ui/list-kit'
+import { Pill, type PillTone } from '@/components/ui/list-kit'
 import { Skeleton } from '@/components/ui/skeleton'
 import { daysAgo } from '@/lib/format'
 import type { LeadNote } from '@/types'
+
+const NOTE_TYPE: Record<LeadNote['type'], [string, PillTone]> = {
+  general: ['Note', 'gray'],
+  meeting: ['Meeting', 'violet'],
+  analysis: ['AI insights', 'blue'],
+  research: ['Research', 'green'],
+}
 
 export function NotesPanel({
   notes,
@@ -65,8 +72,8 @@ export function NotesPanel({
           {notes.map(note => (
             <li key={note.id} className="rounded-xl bg-gray-50 px-3 py-2.5">
               <div className="mb-1 flex items-center justify-between gap-2">
-                <Pill tone={note.type === 'meeting' ? 'violet' : 'gray'} dot={false}>
-                  {note.type === 'meeting' ? 'Meeting' : 'Note'}
+                <Pill tone={NOTE_TYPE[note.type]?.[1] ?? 'gray'} dot={false}>
+                  {NOTE_TYPE[note.type]?.[0] ?? 'Note'}
                 </Pill>
                 <span className="text-xs text-gray-500">
                   {daysAgo(note.created_at)}
