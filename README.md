@@ -4,6 +4,10 @@ A small leads tracker for a fictional Ibadan caterer, **Ade’s Kitchen**. It is
 
 It uses the same API routes, database tables and `server.ts` as the Google codelab sample app it is based on, so the codelab steps work here unchanged. The one addition is `/api/chat`, which keeps the Gemini key on the server. The UI uses the Qorelly V2 design, and the data is set in Nigeria.
 
+## Workshop
+
+Running the DevFest Ibadan 2026 session? Start with the [codelab guide](docs/codelab/README.md). Facilitators: see the [facilitator guide](docs/codelab/FACILITATOR.md).
+
 ## What you need
 
 - Node.js 20 (`nvm use` reads `.nvmrc`)
