@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export const VIEWS = ['leads', 'dashboard', 'meetings', 'chat'] as const
+export const VIEWS = ['leads', 'dashboard', 'meetings', 'chat', 'email'] as const
 
 export type View = (typeof VIEWS)[number]
 
