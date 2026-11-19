@@ -10,3 +10,5 @@ code_review.md
 !.agents/skills/
 .DS_Store
 *.log
+__pycache__/
+.venv/
