@@ -11,13 +11,21 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input, Label, Textarea } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { parseDbDate } from '@/lib/format'
-import type { Meeting } from '@/types'
+import type { Lead, Meeting } from '@/types'
 
 export interface MeetingFormValues {
   title: string
   meeting_date: string
   notes: string
+  lead_id?: number
 }
 
 function toLocalInput(value: string) {
@@ -29,14 +37,17 @@ export function MeetingFormDialog({
   onOpenChange,
   meeting,
   leadName,
+  leads,
   onSubmit,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   meeting: Meeting | null
-  leadName: string
+  leadName?: string
+  leads?: Lead[]
   onSubmit: (values: MeetingFormValues) => Promise<void>
 }) {
+  const pickLead = Boolean(leads) && !meeting
   const [form, setForm] = useState<MeetingFormValues>({
     title: '',
     meeting_date: '',
@@ -52,6 +63,7 @@ export function MeetingFormDialog({
             title: meeting.title,
             meeting_date: toLocalInput(meeting.meeting_date),
             notes: meeting.notes ?? '',
+            lead_id: meeting.lead_id,
           }
         : { title: '', meeting_date: '', notes: '' },
     )
@@ -73,9 +85,35 @@ export function MeetingFormDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{meeting ? 'Edit meeting' : 'Schedule meeting'}</DialogTitle>
-          <DialogDescription>With {leadName}</DialogDescription>
+          <DialogDescription>
+            {pickLead
+              ? 'Pick the lead and when you are meeting them.'
+              : `With ${meeting?.lead_name ?? leadName ?? 'this lead'}`}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4">
+          {pickLead && (
+            <div className="grid gap-1.5">
+              <Label htmlFor="meeting-lead">Lead</Label>
+              <Select
+                required
+                value={form.lead_id ? String(form.lead_id) : ''}
+                onValueChange={v => setForm(f => ({ ...f, lead_id: Number(v) }))}
+              >
+                <SelectTrigger id="meeting-lead">
+                  <SelectValue placeholder="Select a lead" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {leads!.map(l => (
+                    <SelectItem key={l.id} value={String(l.id)}>
+                      {l.name}
+                      {l.company ? ` · ${l.company}` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="grid gap-1.5">
             <Label htmlFor="meeting-title">Title</Label>
             <Input
@@ -115,7 +153,7 @@ export function MeetingFormDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={saving}>
+            <Button type="submit" disabled={saving || (pickLead && !form.lead_id)}>
               {meeting ? 'Save meeting' : 'Schedule'}
             </Button>
           </DialogFooter>

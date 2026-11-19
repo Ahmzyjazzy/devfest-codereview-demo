@@ -21,6 +21,7 @@ export const ICON_NAMES = [
   "phone",
   "refresh",
   "trash-bin-trash",
+  "user-circle",
   "users-group-rounded",
   "wallet-money",
   "widget-5"
