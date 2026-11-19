@@ -339,10 +339,12 @@ git add server.ts
 ```
 
 ```bash
-git commit -m "fix: make lead search safe from sql injection"
+git commit -m "fix(server): make lead search safe from sql injection"
 ```
 
 Avoid `git add .` in this workshop: it picks up files you did not mean to share.
+
+This repo checks every commit message with commitlint. A message needs a type and a scope, like `fix(server): …` or `feat(agent): …`. The allowed scopes are `repo`, `ui`, `server`, `db`, `docs`, `agent` and `ci`. A message without a scope is rejected with `scope may not be empty`.
 
 ## 5. Case 2, part 1: build a review agent with the SDK
 
@@ -654,7 +656,7 @@ git add code_review_agent .github
 ```
 
 ```bash
-git commit -m "feat: add ai security review agent and github action"
+git commit -m "feat(agent): add ai security review agent and github action"
 ```
 
 ```bash
@@ -675,6 +677,10 @@ gh secret set GEMINI_API_KEY
 
 Paste your key when asked and press Enter. It is sent to GitHub encrypted and is never shown again. (Or use **Settings → Secrets and variables → Actions → New repository secret**.)
 
+You should see `GEMINI_API_KEY` listed under **Repository secrets**. GitHub shows only the name, never the value.
+
+![The GEMINI_API_KEY repository secret](screenshots/2c/01-repo-secret.jpg)
+
 ### Open a pull request into your own fork
 
 ```bash
@@ -689,7 +695,17 @@ Because you ran `gh repo set-default` earlier, this opens the PR in **your fork*
 gh pr checks --watch
 ```
 
-When the **AI Security Review** check finishes, open the PR. The agent's findings appear as a comment.
+The check takes about a minute. When it passes, you should see a green tick next to **AI Security Review** on the PR's **Checks** tab:
+
+![The AI Security Review check on the pull request](screenshots/2c/02-pr-check.jpg)
+
+Click the check to see each step. **Run security review** is the agent at work, and **Post findings as PR comment** adds its review to the PR:
+
+![Every step of the review job passed](screenshots/2c/03-review-run-passed.jpg)
+
+Open the PR's **Conversation** tab. The findings appear as a comment from **github-actions**, with a severity, a file and line, and a proposed fix for each issue. Compare them with what the agent found locally in section 5: the wording changes from run to run, but the issues should be the same.
+
+You may also see a warning that Node.js 20 is deprecated for `actions/checkout@v4` and `actions/github-script@v7`. It does not affect the review.
 
 The workflow runs for pull requests inside your fork. It does not run for pull requests from other people's forks, because GitHub does not share secrets with them.
 

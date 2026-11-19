@@ -39,6 +39,7 @@ If the room is behind at 0:55, demo section 5 on the projector and let people fo
 | Action never starts | Actions are off in new forks: Actions tab → enable workflows. |
 | Action fails on the review step | Missing `GEMINI_API_KEY` secret in their fork. |
 | `npx skills add` fails with `does not provide an export named 'glob'` | They ran the latest installer on Node 20. Use `npx skills@1.5.18 add …` as the guide says. |
+| `git commit` fails with `scope may not be empty` | The commitlint hook needs a scope: `fix(server): …` or `feat(agent): …`, as the guide shows. |
 | `better-sqlite3` build error | Missing compiler tools; see the troubleshooting section. |
 | `agy` asks for sign-in every time | They closed it during setup; run `agy` once and finish sign-in. |
 | Review misses an issue | Normal: models vary. Ask a follow-up question, or compare with a neighbour's review. That is part of the lesson. |
