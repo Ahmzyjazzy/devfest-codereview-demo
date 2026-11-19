@@ -5,6 +5,8 @@ leads.db-*
 .env*
 !.env.example
 code_review.md
-.agents/
+.agents/*
+!.agents/rules/
+!.agents/skills/
 .DS_Store
 *.log
