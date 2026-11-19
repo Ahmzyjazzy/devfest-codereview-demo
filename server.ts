@@ -63,6 +63,111 @@ async function startServer() {
     }
   });
 
+  app.get("/api/leads/:id/notes", (req, res) => {
+    const { id } = req.params;
+    try {
+      const notes = db.prepare("SELECT * FROM lead_notes WHERE lead_id = ? ORDER BY created_at DESC").all(id);
+      res.json(notes);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch lead notes" });
+    }
+  });
+
+  app.post("/api/leads/:id/notes", (req, res) => {
+    const { id } = req.params;
+    const { content, type } = req.body;
+    try {
+      const info = db.prepare(`
+        INSERT INTO lead_notes (lead_id, content, type)
+        VALUES (?, ?, ?)
+      `).run(id, content, type || 'general');
+      
+      const newNote = db.prepare("SELECT * FROM lead_notes WHERE id = ?").get(info.lastInsertRowid);
+      res.status(201).json(newNote);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create lead note" });
+    }
+  });
+
+  // API Routes - Meetings
+  app.get("/api/meetings", (req, res) => {
+    try {
+      const meetings = db.prepare(`
+        SELECT m.*, l.name as lead_name, l.company as lead_company 
+        FROM meetings m
+        JOIN leads l ON m.lead_id = l.id
+        ORDER BY m.meeting_date ASC
+      `).all();
+      res.json(meetings);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch meetings" });
+    }
+  });
+
+  app.post("/api/meetings", (req, res) => {
+    const { lead_id, title, meeting_date, notes } = req.body;
+    try {
+      const info = db.prepare(`
+        INSERT INTO meetings (lead_id, title, meeting_date, notes)
+        VALUES (?, ?, ?, ?)
+      `).run(lead_id, title, meeting_date, notes || '');
+      
+      if (notes) {
+        db.prepare(`
+          INSERT INTO lead_notes (lead_id, content, type)
+          VALUES (?, ?, ?)
+        `).run(lead_id, `Meeting Scheduled: ${title}\n\nNotes: ${notes}`, 'meeting');
+      }
+
+      const newMeeting = db.prepare("SELECT * FROM meetings WHERE id = ?").get(info.lastInsertRowid);
+      res.status(201).json(newMeeting);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create meeting" });
+    }
+  });
+
+  app.put("/api/meetings/:id", (req, res) => {
+    const { id } = req.params;
+    const { title, meeting_date, notes, is_completed } = req.body;
+    try {
+      const oldMeeting = db.prepare("SELECT * FROM meetings WHERE id = ?").get(id);
+      
+      db.prepare(`
+        UPDATE meetings 
+        SET title = ?, meeting_date = ?, notes = ?, is_completed = ?
+        WHERE id = ?
+      `).run(title, meeting_date, notes, is_completed ? 1 : 0, id);
+      
+      // Log changed notes or a completion
+      if (notes && notes !== oldMeeting.notes) {
+        db.prepare(`
+          INSERT INTO lead_notes (lead_id, content, type)
+          VALUES (?, ?, ?)
+        `).run(oldMeeting.lead_id, `Meeting Update: ${title}\n\nNotes: ${notes}`, 'meeting');
+      } else if (is_completed && !oldMeeting.is_completed) {
+        db.prepare(`
+          INSERT INTO lead_notes (lead_id, content, type)
+          VALUES (?, ?, ?)
+        `).run(oldMeeting.lead_id, `Meeting Completed: ${title}`, 'meeting');
+      }
+
+      const updatedMeeting = db.prepare("SELECT * FROM meetings WHERE id = ?").get(id);
+      res.json(updatedMeeting);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update meeting" });
+    }
+  });
+
+  app.delete("/api/meetings/:id", (req, res) => {
+    const { id } = req.params;
+    try {
+      db.prepare("DELETE FROM meetings WHERE id = ?").run(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete meeting" });
+    }
+  });
+
   app.post("/api/leads", (req, res) => {
     const { name, company, email, phone, status, value, notes } = req.body;
     try {
