@@ -24,7 +24,9 @@ import {
 } from '@/components/ui/list-kit'
 import { PageHeader } from '@/components/ui/page-header'
 import { Skeleton } from '@/components/ui/skeleton'
+import { StatCard } from '@/components/ui/stat-card'
 import {
+  OPEN_STATUSES,
   STATUS_OPTIONS,
   STATUS_TONE,
   type Lead,
@@ -156,6 +158,12 @@ export function LeadsPage() {
 
   const hasLeads = leads.length > 0
 
+  const openLeads = useMemo(
+    () => leads.filter(l => OPEN_STATUSES.includes(l.status)),
+    [leads],
+  )
+  const pipelineEstimate = openLeads.reduce((sum, l) => sum + l.value, 0)
+
   return (
     <>
       <PageHeader
@@ -163,6 +171,23 @@ export function LeadsPage() {
         subtitle="Businesses Ade’s Kitchen is pitching catering to."
         actions={<PrimaryButton onClick={openAdd}>Add lead</PrimaryButton>}
       />
+
+      <div className="mb-6 grid gap-3 sm:grid-cols-2">
+        <StatCard
+          label="Open leads"
+          icon="users-group-rounded"
+          value={openLeads.length}
+          sub="New, Contacted, Qualified and Proposal"
+          loading={loading}
+        />
+        <StatCard
+          label="Est. pipeline value"
+          icon="wallet-money"
+          value={formatMoney(pipelineEstimate)}
+          sub="Estimate: sum of open leads’ deal values"
+          loading={loading}
+        />
+      </div>
 
       <div className="space-y-4">
         <div className="flex flex-col gap-3">
