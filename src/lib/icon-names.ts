@@ -19,6 +19,7 @@ export const ICON_NAMES = [
   "notes",
   "pen",
   "phone",
+  "plane",
   "refresh",
   "trash-bin-trash",
   "user-circle",

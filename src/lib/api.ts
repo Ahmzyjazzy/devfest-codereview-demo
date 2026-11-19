@@ -6,6 +6,20 @@ import type {
   MeetingInput,
 } from '@/types'
 
+export class ApiError extends Error {
+  status: number
+
+  constructor(message: string, status: number) {
+    super(message)
+    this.status = status
+  }
+}
+
+export interface ChatTurn {
+  role: 'user' | 'model'
+  text: string
+}
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
     ...init,
@@ -13,7 +27,7 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   })
   const body = await res.json().catch(() => null)
   if (!res.ok) {
-    throw new Error(body?.error ?? `Request failed (${res.status})`)
+    throw new ApiError(body?.error ?? `Request failed (${res.status})`, res.status)
   }
   return body as T
 }
@@ -49,4 +63,7 @@ export const api = {
   ) => request<Meeting>(`/api/meetings/${id}`, send('PUT', input)),
   deleteMeeting: (id: number) =>
     request<{ success: boolean }>(`/api/meetings/${id}`, send('DELETE')),
+
+  chat: (message: string, history: ChatTurn[]) =>
+    request<{ text: string }>('/api/chat', send('POST', { message, history })),
 }
