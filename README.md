@@ -2,7 +2,7 @@
 
 A small leads tracker for a fictional Ibadan caterer, **Ade’s Kitchen**. It is the sample app for the DevFest Ibadan 2026 workshop on reviewing AI-written code with the Antigravity CLI and SDK.
 
-It uses the same API routes, database tables and `server.ts` as the Google codelab sample app it is based on, so the codelab steps work here unchanged. The UI uses the Qorelly V2 design, and the data is set in Nigeria.
+It uses the same API routes, database tables and `server.ts` as the Google codelab sample app it is based on, so the codelab steps work here unchanged. The one addition is `/api/chat`, which keeps the Gemini key on the server. The UI uses the Qorelly V2 design, and the data is set in Nigeria.
 
 ## What you need
 
@@ -10,7 +10,17 @@ It uses the same API routes, database tables and `server.ts` as the Google codel
 - npm
 - Git
 
-No API keys or environment variables are needed.
+No API keys are needed for leads, the dashboard or meetings.
+
+### Optional: turn on Chat
+
+Chat uses Gemini. To turn it on:
+
+```bash
+cp .env.example .env
+```
+
+Add your key after `GEMINI_API_KEY=` in `.env`, then restart `npm run dev`. The key stays on the server: the browser calls `/api/chat`, and the server calls Gemini. Without a key, the Chat page explains how to set one up and the rest of the app works as normal.
 
 ## Run it locally
 
@@ -38,10 +48,10 @@ The first `npm run dev` creates `leads.db` and fills it with 25 sample leads, 10
 
 ## What the app does
 
-- Lists leads with search, status tabs, an estimated-value column and paging
-- Adds, edits and deletes leads
-- Opens a lead in a side panel to change its status, add notes, and schedule, edit, complete or delete meetings
-- Shows the number of open leads and an estimated pipeline value. This value is the sum of estimated deal sizes for open leads. It is not revenue.
+- **Leads:** search, status tabs, an estimated-value column and paging. Add, edit and delete leads. Open a lead in a side panel to change its status, add notes, and schedule, edit, complete or delete meetings.
+- **Dashboard:** total and open leads, the estimated value of won deals, the estimated pipeline value, and leads by status. Every money figure is a sum of estimated deal sizes. None of it is revenue.
+- **Meetings:** every meeting across all leads, with search and Upcoming, Overdue, Completed and All tabs. Schedule a meeting for any lead, then edit, complete or delete it.
+- **Chat:** an assistant that answers questions about your leads and meetings. Needs `GEMINI_API_KEY` (see above).
 
 ## API
 
@@ -57,6 +67,7 @@ The first `npm run dev` creates `leads.db` and fills it with 25 sample leads, 10
 | POST | `/api/meetings` | Schedule a meeting |
 | PUT | `/api/meetings/:id` | Update or complete a meeting |
 | DELETE | `/api/meetings/:id` | Delete a meeting |
+| POST | `/api/chat` | Ask the assistant a question (needs `GEMINI_API_KEY`) |
 
 ## Project layout
 
@@ -66,6 +77,9 @@ seed-database.js       Creates tables and seeds an empty leads.db
 seed-data.sql          Sample leads, meetings and notes
 src/components/ui/     Design kit ported from Qorelly V2
 src/features/leads/    Leads list, form, detail sheet, notes and meetings
+src/features/dashboard/ Pipeline dashboard
+src/features/meetings/ Meetings across all leads
+src/features/chat/     Sales assistant chat
 src/features/shell/    App frame, rail and top bar
 src/lib/               API client, formatting and icon helpers
 ```
