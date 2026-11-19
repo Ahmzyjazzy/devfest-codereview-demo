@@ -1,0 +1,10 @@
+node_modules
+dist
+leads.db
+leads.db-*
+.env*
+!.env.example
+code_review.md
+.agents/
+.DS_Store
+*.log

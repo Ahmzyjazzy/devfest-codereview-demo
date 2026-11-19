@@ -1,0 +1,13 @@
+Qorelly Leads (DevFest Ibadan 2026 demo)
+Copyright 2026 Ahmed Olanrewaju
+
+This product is derived from leads-crm-app-demo
+(https://github.com/alphinside/leads-crm-app-demo),
+the sample app for the Google codelab on AI code review
+with the Antigravity CLI and SDK, licensed under the
+Apache License, Version 2.0.
+
+Modifications: the UI was rebuilt with the Qorelly V2
+design, the AI Studio and Gemini features were removed,
+and the seed data was replaced with a Nigerian SME
+context. The API routes and database schema are kept.
