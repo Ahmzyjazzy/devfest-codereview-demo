@@ -13,8 +13,8 @@ import {
 const BUSINESS_NAME = 'Ade’s Kitchen, Ibadan'
 
 const NAV: { view: View; label: string; icon: IconName }[] = [
-  { view: 'leads', label: 'Leads', icon: 'users-group-rounded' },
   { view: 'dashboard', label: 'Dashboard', icon: 'widget-5' },
+  { view: 'leads', label: 'Leads', icon: 'users-group-rounded' },
   { view: 'meetings', label: 'Meetings', icon: 'calendar' },
   { view: 'chat', label: 'Chat', icon: 'chat-round-dots' },
 ]
