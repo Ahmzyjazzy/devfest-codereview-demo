@@ -14,6 +14,7 @@ For the DevFest Ibadan 2026 session leads and helpers running the [attendee code
 - Every attendee uses **their own** Gemini key from Google AI Studio.
 - Never show a key on the projector, in chat or in screenshots. Do not hand out a shared key.
 - If a key is exposed, the owner deletes it in AI Studio straight away.
+- The app's AI features (Chat, AI insights, Research lead) are optional and use the same key from `.env`. Research lead uses Google Search and takes 20 to 40 seconds, which is a good moment to explain that the key stays on the server.
 
 ## Timing plan (90 minutes)
 
@@ -41,6 +42,7 @@ If the room is behind at 0:55, demo section 5 on the projector and let people fo
 | `npx skills add` fails with `does not provide an export named 'glob'` | They ran the latest installer on Node 20. Use `npx skills@1.5.18 add …` as the guide says. |
 | `git commit` fails with `scope may not be empty` | The commitlint hook needs a scope: `fix(server): …` or `feat(agent): …`, as the guide shows. |
 | `better-sqlite3` build error | Missing compiler tools; see the troubleshooting section. |
+| AI buttons say "AI is not set up" | No key in `.env`, or the server was not restarted after adding it. |
 | `agy` asks for sign-in every time | They closed it during setup; run `agy` once and finish sign-in. |
 | Review misses an issue | Normal: models vary. Ask a follow-up question, or compare with a neighbour's review. That is part of the lesson. |
 

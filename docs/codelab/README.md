@@ -170,7 +170,7 @@ Open http://localhost:3000. The first run creates `leads.db` with 25 sample lead
 
 Take a quick tour:
 
-- **Leads:** search, status tabs, add a lead, open one to see its notes and meetings.
+- **Leads:** search, status tabs, add a lead, open one to see its notes and meetings. The lead's side panel also has **AI insights** and **Research lead** buttons (optional, see below).
 - **Dashboard:** open leads and the estimated pipeline. Every ₦ figure is an estimated deal size, not revenue.
 - **Meetings:** every meeting across all leads.
 - **Chat:** an assistant that answers questions about your leads. It is optional (see below).
@@ -179,13 +179,23 @@ Take a quick tour:
 
 ![Dashboard](screenshots/2b/01-dashboard.jpg)
 
-**Optional: turn on Chat.** Chat calls Gemini from the server, so your key never reaches the browser.
+**Optional: turn on the AI features.** Three features use Gemini, and all three call it from the server, so your key never reaches the browser:
+
+- **Chat** answers questions about your leads and meetings.
+- **AI insights** (in a lead's side panel) gives a short summary of the lead and three next steps.
+- **Research lead** (in a lead's side panel) searches the web with Google Search for the business, missing contact details and recent news, and lists its sources. It takes about 30 seconds.
+
+Both lead features save their result to the lead's notes log, labelled **AI insights** or **Research**.
+
+![AI insights in a lead's side panel](screenshots/ai/01-ai-insights.jpg)
+
+To turn them on:
 
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` in your editor, put your key after `GEMINI_API_KEY=`, save, and restart `npm run dev`. `.env` is in `.gitignore`, so it is never committed.
+Open `.env` in your editor, put your key after `GEMINI_API_KEY=`, save, and restart `npm run dev`. `.env` is in `.gitignore`, so it is never committed. Without a key, the rest of the app works and each AI feature explains how to set one up.
 
 Stop the server with `Ctrl+C` before the next section.
 
@@ -741,7 +751,7 @@ GEMINI_API_KEY=test-key-not-real npm run build
 grep -c test-key-not-real dist/assets/*.js
 ```
 
-If the count is above 0, anyone who opens the page can read the key. Compare with `main`, where Chat calls Gemini from the server. Delete the build when you are done:
+If the count is above 0, anyone who opens the page can read the key. Compare with `main`, where Chat, AI insights and Research lead call Gemini from the server through `/api/chat`, `/api/leads/:id/insights` and `/api/leads/:id/research`. Delete the build when you are done:
 
 ```bash
 rm -rf dist
@@ -788,5 +798,9 @@ Further reading:
 **The GitHub Action fails at "Run security review".** Check that the `GEMINI_API_KEY` secret exists in **your fork** (`gh secret list`) and that Actions are enabled.
 
 **The PR opened on `Ahmzyjazzy/devfest-codereview-demo`.** Close it, run `gh repo set-default <your-username>/devfest-codereview-demo`, and create it again.
+
+**The AI buttons or Chat say AI is not set up.** Add your key to `.env` (see section 2) and restart `npm run dev`. The server reads `.env` only when it starts.
+
+**Research lead is slow.** It searches the web first, so 20 to 40 seconds is normal.
 
 **I want fresh sample data.** Stop the server, delete `leads.db`, and run `npm run dev`.
