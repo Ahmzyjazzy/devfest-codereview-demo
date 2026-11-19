@@ -60,3 +60,21 @@
     @apply bg-gray-100 font-sans text-gray-900 antialiased;
   }
 }
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes sheet-in-right {
+  from {
+    transform: translateX(calc(100% + 1rem));
+  }
+}
+
+@keyframes sheet-in-left {
+  from {
+    transform: translateX(calc(-100% - 1rem));
+  }
+}
