@@ -38,6 +38,7 @@ export function CountTabs<K extends string>({
             type="button"
             role="tab"
             aria-selected={on}
+            aria-label={`${t.label}, ${t.count}`}
             onClick={() => onChange(t.key)}
             className={cn(
               'relative flex h-9 min-w-max flex-1 items-center justify-center gap-1.5 rounded-[10px] px-2.5 text-[13px] font-medium transition-colors',

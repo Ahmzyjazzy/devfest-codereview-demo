@@ -31,6 +31,7 @@ import {
   type LeadInput,
   type LeadStatus,
 } from '@/types'
+import { LeadDetailSheet } from './LeadDetailSheet'
 import { LeadFormDialog } from './LeadFormDialog'
 
 const PAGE_SIZE = 10
@@ -68,6 +69,9 @@ export function LeadsPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Lead | null>(null)
   const [deleting, setDeleting] = useState<Lead | null>(null)
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+
+  const selected = leads.find(l => l.id === selectedId) ?? null
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -142,6 +146,7 @@ export function LeadsPage() {
     try {
       await api.deleteLead(deleting.id)
       setLeads(ls => ls.filter(l => l.id !== deleting.id))
+      if (selectedId === deleting.id) setSelectedId(null)
       toast.success('Lead deleted')
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Could not delete lead')
@@ -243,9 +248,21 @@ export function LeadsPage() {
               </thead>
               <tbody>
                 {pageRows.map(lead => (
-                  <tr key={lead.id}>
+                  <tr
+                    key={lead.id}
+                    onClick={() => setSelectedId(lead.id)}
+                    className="cursor-pointer"
+                  >
                     <td>
-                      <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={e => {
+                          e.stopPropagation()
+                          setSelectedId(lead.id)
+                        }}
+                        aria-label={`Open ${lead.name}`}
+                        className="flex items-center gap-3 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                      >
                         <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-light text-xs font-medium text-primary">
                           {initials(lead.name)}
                         </span>
@@ -257,7 +274,7 @@ export function LeadsPage() {
                             {lead.company || 'No business name'}
                           </p>
                         </div>
-                      </div>
+                      </button>
                     </td>
                     <td className="whitespace-nowrap text-gray-600 tabular-nums max-md:hidden">
                       {formatPhoneForDisplay(lead.phone) || '—'}
@@ -273,12 +290,16 @@ export function LeadsPage() {
                     <td className="whitespace-nowrap text-gray-500 max-lg:hidden">
                       {daysAgo(lead.updated_at)}
                     </td>
-                    <td className="text-right">
+                    <td className="text-right" onClick={e => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <RowMenuTrigger aria-label={`Actions for ${lead.name}`} />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onSelect={() => setSelectedId(lead.id)}>
+                            <Icon name="notes" size={16} />
+                            View details
+                          </DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => openEdit(lead)}>
                             <Icon name="pen" size={16} />
                             Edit
@@ -306,6 +327,16 @@ export function LeadsPage() {
         onOpenChange={setFormOpen}
         lead={editing}
         onSubmit={saveLead}
+      />
+
+      <LeadDetailSheet
+        lead={selected}
+        onOpenChange={open => !open && setSelectedId(null)}
+        onLeadChange={updated =>
+          setLeads(ls => ls.map(l => (l.id === updated.id ? updated : l)))
+        }
+        onEdit={openEdit}
+        onDelete={setDeleting}
       />
 
       <ConfirmDialog
