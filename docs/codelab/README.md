@@ -623,7 +623,7 @@ jobs:
     steps:
       - name: Install git
         run: apt-get update && apt-get install -y git
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Run security review
@@ -634,7 +634,7 @@ jobs:
           uv run --project code_review_agent code_review_agent/review_agent.py .
       - name: Post findings as PR comment
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
@@ -704,8 +704,6 @@ Click the check to see each step. **Run security review** is the agent at work, 
 ![Every step of the review job passed](screenshots/2c/03-review-run-passed.jpg)
 
 Open the PR's **Conversation** tab. The findings appear as a comment from **github-actions**, with a severity, a file and line, and a proposed fix for each issue. Compare them with what the agent found locally in section 5: the wording changes from run to run, but the issues should be the same.
-
-You may also see a warning that Node.js 20 is deprecated for `actions/checkout@v4` and `actions/github-script@v7`. It does not affect the review.
 
 The workflow runs for pull requests inside your fork. It does not run for pull requests from other people's forks, because GitHub does not share secrets with them.
 
