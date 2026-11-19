@@ -283,7 +283,8 @@ Each lead's value is an ESTIMATED deal size in Nigerian naira, not revenue.
 Leads: ${JSON.stringify(leads)}
 Meetings: ${JSON.stringify(meetings)}
 Answer questions about leads, meetings and the pipeline. Be concise and practical.
-Use the data above; say so when it does not answer the question.`,
+Use the data above; say so when it does not answer the question.
+Reply in plain text. Do not use Markdown, asterisks or headings.`,
         },
       });
 
