@@ -24,7 +24,7 @@ Chat uses Gemini. To turn it on:
 cp .env.example .env
 ```
 
-Add your key after `GEMINI_API_KEY=` in `.env`, then restart `npm run dev`. The key stays on the server: the browser calls `/api/chat`, and the server calls Gemini. Without a key, the Chat page explains how to set one up and the rest of the app works as normal.
+Add your key after `GEMINI_API_KEY=` in `.env`, then restart `npm run dev`. The key stays on the server: the browser calls `/api/chat`, and the server calls Gemini. The same key powers AI insights and lead research. Without a key, these features explain how to set one up and the rest of the app works as normal.
 
 ## Run it locally
 
@@ -53,6 +53,7 @@ The first `npm run dev` creates `leads.db` and fills it with 25 sample leads, 10
 ## What the app does
 
 - **Leads:** search, status tabs, an estimated-value column and paging. Add, edit and delete leads. Open a lead in a side panel to change its status, add notes, and schedule, edit, complete or delete meetings.
+- **AI insights and lead research:** in a lead's side panel, get a summary with three next steps, or research the business on the web with Google Search. Each result is saved to the lead's notes log. Needs `GEMINI_API_KEY`.
 - **Dashboard:** total and open leads, the estimated value of won deals, the estimated pipeline value, and leads by status. Every money figure is a sum of estimated deal sizes. None of it is revenue.
 - **Meetings:** every meeting across all leads, with search and Upcoming, Overdue, Completed and All tabs. Schedule a meeting for any lead, then edit, complete or delete it.
 - **Chat:** an assistant that answers questions about your leads and meetings. Needs `GEMINI_API_KEY` (see above).
@@ -72,6 +73,8 @@ The first `npm run dev` creates `leads.db` and fills it with 25 sample leads, 10
 | PUT | `/api/meetings/:id` | Update or complete a meeting |
 | DELETE | `/api/meetings/:id` | Delete a meeting |
 | POST | `/api/chat` | Ask the assistant a question (needs `GEMINI_API_KEY`) |
+| POST | `/api/leads/:id/insights` | AI summary and three next steps for a lead, saved as an `analysis` note (needs `GEMINI_API_KEY`) |
+| POST | `/api/leads/:id/research` | AI web research on a lead with Google Search sources, saved as a `research` note (needs `GEMINI_API_KEY`) |
 
 ## Project layout
 
