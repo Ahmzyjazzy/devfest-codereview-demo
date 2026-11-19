@@ -11,3 +11,9 @@ Modifications: the UI was rebuilt with the Qorelly V2
 design, the AI Studio and Gemini features were removed,
 and the seed data was replaced with a Nigerian SME
 context. The API routes and database schema are kept.
+
+Icons: Solar by 480 Design
+(https://www.figma.com/community/file/1166831539721848736),
+licensed under CC BY 4.0
+(https://creativecommons.org/licenses/by/4.0/).
+A subset is bundled in src/lib/solar-icons.json.
